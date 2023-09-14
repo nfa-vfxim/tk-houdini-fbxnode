@@ -9,78 +9,78 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 """
-Alembic Output node App for use with Toolkit's Houdini engine.
+fbx Output node App for use with Toolkit's Houdini engine.
 """
 
 import sgtk
 
 
-class TkAlembicNodeApp(sgtk.platform.Application):
-    """The Alembic Output Node."""
+class TkfbxNodeApp(sgtk.platform.Application):
+    """The fbx Output Node."""
 
     def init_app(self):
         """Initialize the app."""
 
-        tk_houdini_alembic = self.import_module("tk_houdini_alembicnode")
-        self.handler = tk_houdini_alembic.TkAlembicNodeHandler(self)
+        tk_houdini_fbx = self.import_module("tk_houdini_fbx")
+        self.handler = tk_houdini_fbx.TkfbxNodeHandler(self)
 
-    def convert_to_regular_alembic_nodes(self):
-        """Convert Toolkit Alembic nodes to regular Alembic nodes.
+    def convert_to_regular_fbx_nodes(self):
+        """Convert Toolkit fbx nodes to regular fbx nodes.
 
-        Convert all Toolkit Alembic nodes found in the current script to
-        regular Alembic nodes. Additional Toolkit information will be stored in
+        Convert all Toolkit fbx nodes found in the current script to
+        regular fbx nodes. Additional Toolkit information will be stored in
         user data named 'tk_*'
 
         Example usage::
 
         >>> import sgtk
         >>> eng = sgtk.platform.current_engine()
-        >>> app = eng.apps["tk-houdini-alembicnode"]
-        >>> app.convert_to_regular_alembic_nodes()
+        >>> app = eng.apps["tk-houdini-fbxnode"]
+        >>> app.convert_to_regular_fbx_nodes()
 
         """
 
-        self.log_debug("Converting Toolkit Alembic nodes to built-in Alembic nodes.")
-        tk_houdini_alembic = self.import_module("tk_houdini_alembicnode")
-        tk_houdini_alembic.TkAlembicNodeHandler.convert_to_regular_alembic_nodes(self)
+        self.log_debug("Converting Toolkit fbx nodes to built-in fbx nodes.")
+        tk_houdini_fbx = self.import_module("tk_houdini_fbx")
+        tk_houdini_fbx.TkfbxNodeHandler.convert_to_regular_fbx_nodes(self)
 
-    def convert_back_to_tk_alembic_nodes(self):
-        """Convert regular Alembic nodes back to Tooklit Alembic nodes.
+    def convert_back_to_tk_fbx_nodes(self):
+        """Convert regular fbx nodes back to Tooklit fbx nodes.
 
-        Convert any regular Alembic nodes that were previously converted
-        from Tooklit Alembic nodes back into Toolkit Alembic nodes.
+        Convert any regular fbx nodes that were previously converted
+        from Tooklit fbx nodes back into Toolkit fbx nodes.
 
         Example usage::
 
         >>> import sgtk
         >>> eng = sgtk.platform.current_engine()
-        >>> app = eng.apps["tk-houdini-alembicnode"]
-        >>> app.convert_back_to_tk_alembic_nodes()
+        >>> app = eng.apps["tk-houdini-fbxnode"]
+        >>> app.convert_back_to_tk_fbx_nodes()
 
         """
 
         self.log_debug(
-            "Converting built-in Alembic nodes back to Toolkit Alembic nodes."
+            "Converting built-in fbx nodes back to Toolkit fbx nodes."
         )
-        tk_houdini_alembic = self.import_module("tk_houdini_alembicnode")
-        tk_houdini_alembic.TkAlembicNodeHandler.convert_back_to_tk_alembic_nodes(self)
+        tk_houdini_fbx = self.import_module("tk_houdini_fbx")
+        tk_houdini_fbx.TkfbxNodeHandler.convert_back_to_tk_fbx_nodes(self)
 
     def get_nodes(self):
         """
-        Returns a list of hou.node objects for each tk alembic node.
+        Returns a list of hou.node objects for each tk fbx node.
 
         Example usage::
 
         >>> import sgtk
         >>> eng = sgtk.platform.current_engine()
-        >>> app = eng.apps["tk-houdini-alembicnode"]
-        >>> tk_alembic_nodes = app.get_nodes()
+        >>> app = eng.apps["tk-houdini-fbxnode"]
+        >>> tk_fbx_nodes = app.get_nodes()
         """
 
-        self.log_debug("Retrieving tk-houdini-alembic nodes...")
-        tk_houdini_alembic = self.import_module("tk_houdini_alembicnode")
-        nodes = tk_houdini_alembic.TkAlembicNodeHandler.get_all_tk_alembic_nodes()
-        self.log_debug("Found %s tk-houdini-alembic nodes." % (len(nodes),))
+        self.log_debug("Retrieving tk-houdini-fbx nodes...")
+        tk_houdini_fbx = self.import_module("tk_houdini_fbx")
+        nodes = tk_houdini_fbx.TkfbxNodeHandler.get_all_tk_fbx_nodes()
+        self.log_debug("Found %s tk-houdini-fbx nodes." % (len(nodes),))
         return nodes
 
     def get_output_path(self, node):
@@ -91,13 +91,13 @@ class TkAlembicNodeApp(sgtk.platform.Application):
 
         >>> import sgtk
         >>> eng = sgtk.platform.current_engine()
-        >>> app = eng.apps["tk-houdini-alembicnode"]
-        >>> output_path = app.get_output_path(tk_alembic_node)
+        >>> app = eng.apps["tk-houdini-fbxnode"]
+        >>> output_path = app.get_output_path(tk_fbx_node)
         """
 
         self.log_debug("Retrieving output path for %s" % (node,))
-        tk_houdini_alembic = self.import_module("tk_houdini_alembicnode")
-        output_path = tk_houdini_alembic.TkAlembicNodeHandler.get_output_path(node)
+        tk_houdini_fbx = self.import_module("tk_houdini_fbx")
+        output_path = tk_houdini_fbx.TkfbxNodeHandler.get_output_path(node)
         self.log_debug("Retrieved output path: %s" % (output_path,))
         return output_path
 

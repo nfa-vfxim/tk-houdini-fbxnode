@@ -23,24 +23,24 @@ import hou
 import sgtk
 
 
-class TkAlembicNodeHandler(object):
-    """Handle Tk Alembic node operations and callbacks."""
+class TkfbxNodeHandler(object):
+    """Handle Tk Fbx node operations and callbacks."""
 
     ############################################################################
     # Class data
 
-    HOU_ROP_ALEMBIC_TYPE = "alembic"
-    """Houdini type for alembic rops."""
+    HOU_ROP_fbx_TYPE = "fbx"
+    """Houdini type for fbx rops."""
 
-    HOU_SOP_ALEMBIC_TYPE = "rop_alembic"
-    """Houdini type for alembic sops."""
-    # this is correct. the houdini internal rop_alembic is a sop.
+    HOU_SOP_fbx_TYPE = "rop_fbx"
+    """Houdini type for fbx sops."""
+    # this is correct. the houdini internal rop_fbx is a sop.
 
     NODE_OUTPUT_PATH_PARM = "filename"
     """The name of the output path parameter on the node."""
 
-    TK_ALEMBIC_NODE_TYPE = "sgtk_alembic"
-    """The class of node as defined in Houdini for the Alembic nodes."""
+    TK_fbx_NODE_TYPE = "sgtk_fbx"
+    """The class of node as defined in Houdini for the fbx nodes."""
 
     TK_OUTPUT_CONNECTIONS_KEY = "tk_output_connections"
     """The key in the user data that stores the save output connections."""
@@ -69,41 +69,41 @@ class TkAlembicNodeHandler(object):
     # Class methods
 
     @classmethod
-    def convert_back_to_tk_alembic_nodes(cls, app):
-        """Convert Alembic nodes back to Toolkit Alembic nodes.
+    def convert_back_to_tk_fbx_nodes(cls, app):
+        """Convert fbx nodes back to Toolkit fbx nodes.
 
         :param app: The calling Toolkit Application
 
-        Note: only converts nodes that had previously been Toolkit Alembic
+        Note: only converts nodes that had previously been Toolkit fbx
         nodes.
 
         """
 
-        # get all rop/sop alembic nodes in the session
-        alembic_nodes = []
-        alembic_nodes.extend(
+        # get all rop/sop fbx nodes in the session
+        fbx_nodes = []
+        fbx_nodes.extend(
             hou.nodeType(
-                hou.sopNodeTypeCategory(), cls.HOU_SOP_ALEMBIC_TYPE
+                hou.sopNodeTypeCategory(), cls.HOU_SOP_fbx_TYPE
             ).instances()
         )
-        alembic_nodes.extend(
+        fbx_nodes.extend(
             hou.nodeType(
-                hou.ropNodeTypeCategory(), cls.HOU_ROP_ALEMBIC_TYPE
+                hou.ropNodeTypeCategory(), cls.HOU_ROP_fbx_TYPE
             ).instances()
         )
 
-        if not alembic_nodes:
-            app.log_debug("No Alembic Nodes found for conversion.")
+        if not fbx_nodes:
+            app.log_debug("No fbx Nodes found for conversion.")
             return
 
         # the tk node type we'll be converting to
-        tk_node_type = TkAlembicNodeHandler.TK_ALEMBIC_NODE_TYPE
+        tk_node_type = TkfbxNodeHandler.TK_fbx_NODE_TYPE
 
-        # iterate over all the alembic nodes and attempt to convert them
-        for alembic_node in alembic_nodes:
+        # iterate over all the fbx nodes and attempt to convert them
+        for fbx_node in fbx_nodes:
 
             # get the user data dictionary stored on the node
-            user_dict = alembic_node.userDataDict()
+            user_dict = fbx_node.userDataDict()
 
             # get the output_profile from the dictionary
             tk_output_profile_name = user_dict.get(cls.TK_OUTPUT_PROFILE_NAME_KEY)
@@ -111,19 +111,19 @@ class TkAlembicNodeHandler(object):
             if not tk_output_profile_name:
                 app.log_warning(
                     "Almbic node '%s' does not have an output profile name. "
-                    "Can't convert to Tk Alembic node. Continuing."
-                    % (alembic_node.name(),)
+                    "Can't convert to Tk fbx node. Continuing."
+                    % (fbx_node.name(),)
                 )
                 continue
 
-            # create a new, Toolkit Alembic node:
-            tk_alembic_node = alembic_node.parent().createNode(tk_node_type)
+            # create a new, Toolkit fbx node:
+            tk_fbx_node = fbx_node.parent().createNode(tk_node_type)
 
-            # find the index of the stored name on the new tk alembic node
+            # find the index of the stored name on the new tk fbx node
             # and set that item in the menu.
             try:
-                output_profile_parm = tk_alembic_node.parm(
-                    TkAlembicNodeHandler.TK_OUTPUT_PROFILE_PARM
+                output_profile_parm = tk_fbx_node.parm(
+                    TkfbxNodeHandler.TK_OUTPUT_PROFILE_PARM
                 )
                 output_profile_index = output_profile_parm.menuLabels().index(
                     tk_output_profile_name
@@ -136,49 +136,49 @@ class TkAlembicNodeHandler(object):
 
             # copy over all parameter values except the output path
             _copy_parm_values(
-                alembic_node, tk_alembic_node, excludes=[cls.NODE_OUTPUT_PATH_PARM]
+                fbx_node, tk_fbx_node, excludes=[cls.NODE_OUTPUT_PATH_PARM]
             )
 
             # copy the inputs and move the outputs
-            _copy_inputs(alembic_node, tk_alembic_node)
+            _copy_inputs(fbx_node, tk_fbx_node)
 
             # determine the built-in operator type
-            if alembic_node.type().name() == cls.HOU_SOP_ALEMBIC_TYPE:
-                _restore_outputs_from_user_data(alembic_node, tk_alembic_node)
-            elif alembic_node.type().name() == cls.HOU_ROP_ALEMBIC_TYPE:
-                _move_outputs(alembic_node, tk_alembic_node)
+            if fbx_node.type().name() == cls.HOU_SOP_fbx_TYPE:
+                _restore_outputs_from_user_data(fbx_node, tk_fbx_node)
+            elif fbx_node.type().name() == cls.HOU_ROP_fbx_TYPE:
+                _move_outputs(fbx_node, tk_fbx_node)
 
             # make the new node the same color. the profile will set a color,
             # but do this just in case the user changed the color manually
             # prior to the conversion.
-            tk_alembic_node.setColor(alembic_node.color())
+            tk_fbx_node.setColor(fbx_node.color())
 
-            # remember the name and position of the original alembic node
-            alembic_node_name = alembic_node.name()
-            alembic_node_pos = alembic_node.position()
+            # remember the name and position of the original fbx node
+            fbx_node_name = fbx_node.name()
+            fbx_node_pos = fbx_node.position()
 
-            # destroy the original alembic node
-            alembic_node.destroy()
+            # destroy the original fbx node
+            fbx_node.destroy()
 
-            # name and reposition the new, regular alembic node to match the
+            # name and reposition the new, regular fbx node to match the
             # original
-            tk_alembic_node.setName(alembic_node_name)
-            tk_alembic_node.setPosition(alembic_node_pos)
+            tk_fbx_node.setName(fbx_node_name)
+            tk_fbx_node.setPosition(fbx_node_pos)
 
             app.log_debug(
-                "Converted: Alembic node '%s' to TK Alembic node."
-                % (alembic_node_name,)
+                "Converted: fbx node '%s' to TK fbx node."
+                % (fbx_node_name,)
             )
 
     @classmethod
-    def convert_to_regular_alembic_nodes(cls, app):
-        """Convert Toolkit Alembic nodes to regular Alembic nodes.
+    def convert_to_regular_fbx_nodes(cls, app):
+        """Convert Toolkit fbx nodes to regular fbx nodes.
 
         :param app: The calling Toolkit Application
 
         """
 
-        tk_node_type = TkAlembicNodeHandler.TK_ALEMBIC_NODE_TYPE
+        tk_node_type = TkfbxNodeHandler.TK_fbx_NODE_TYPE
 
         # determine the surface operator type for this class of node
         sop_types = hou.sopNodeTypeCategory().nodeTypes()
@@ -188,104 +188,104 @@ class TkAlembicNodeHandler(object):
         rop_types = hou.ropNodeTypeCategory().nodeTypes()
         rop_type = rop_types[tk_node_type]
 
-        # get all instances of tk alembic rop/sop nodes
-        tk_alembic_nodes = []
-        tk_alembic_nodes.extend(
+        # get all instances of tk fbx rop/sop nodes
+        tk_fbx_nodes = []
+        tk_fbx_nodes.extend(
             hou.nodeType(hou.sopNodeTypeCategory(), tk_node_type).instances()
         )
-        tk_alembic_nodes.extend(
+        tk_fbx_nodes.extend(
             hou.nodeType(hou.ropNodeTypeCategory(), tk_node_type).instances()
         )
 
-        if not tk_alembic_nodes:
-            app.log_debug("No Toolkit Alembic Nodes found for conversion.")
+        if not tk_fbx_nodes:
+            app.log_debug("No Toolkit fbx Nodes found for conversion.")
             return
 
-        # iterate over all the tk alembic nodes and attempt to convert them
-        for tk_alembic_node in tk_alembic_nodes:
+        # iterate over all the tk fbx nodes and attempt to convert them
+        for tk_fbx_node in tk_fbx_nodes:
 
             # determine the corresponding, built-in operator type
-            if tk_alembic_node.type() == sop_type:
-                alembic_operator = cls.HOU_SOP_ALEMBIC_TYPE
-            elif tk_alembic_node.type() == rop_type:
-                alembic_operator = cls.HOU_ROP_ALEMBIC_TYPE
+            if tk_fbx_node.type() == sop_type:
+                fbx_operator = cls.HOU_SOP_fbx_TYPE
+            elif tk_fbx_node.type() == rop_type:
+                fbx_operator = cls.HOU_ROP_fbx_TYPE
             else:
                 app.log_warning(
                     "Unknown type for node '%s': %s'"
-                    % (tk_alembic_node.name(), tk_alembic_node.type())
+                    % (tk_fbx_node.name(), tk_fbx_node.type())
                 )
                 continue
 
-            # create a new, regular Alembic node
-            alembic_node = tk_alembic_node.parent().createNode(alembic_operator)
+            # create a new, regular fbx node
+            fbx_node = tk_fbx_node.parent().createNode(fbx_operator)
 
             # copy the file parms value to the new node
             filename = _get_output_menu_label(
-                tk_alembic_node.parm(cls.NODE_OUTPUT_PATH_PARM)
+                tk_fbx_node.parm(cls.NODE_OUTPUT_PATH_PARM)
             )
-            alembic_node.parm(cls.NODE_OUTPUT_PATH_PARM).set(filename)
+            fbx_node.parm(cls.NODE_OUTPUT_PATH_PARM).set(filename)
 
             # copy across knob values
             _copy_parm_values(
-                tk_alembic_node, alembic_node, excludes=[cls.NODE_OUTPUT_PATH_PARM]
+                tk_fbx_node, fbx_node, excludes=[cls.NODE_OUTPUT_PATH_PARM]
             )
 
-            # store the alembic output profile name in the user data so that we
+            # store the fbx output profile name in the user data so that we
             # can retrieve it later.
-            output_profile_parm = tk_alembic_node.parm(cls.TK_OUTPUT_PROFILE_PARM)
+            output_profile_parm = tk_fbx_node.parm(cls.TK_OUTPUT_PROFILE_PARM)
             tk_output_profile_name = output_profile_parm.menuLabels()[
                 output_profile_parm.eval()
             ]
-            alembic_node.setUserData(
+            fbx_node.setUserData(
                 cls.TK_OUTPUT_PROFILE_NAME_KEY, tk_output_profile_name
             )
 
             # copy the inputs and move the outputs
-            _copy_inputs(tk_alembic_node, alembic_node)
-            if alembic_operator == cls.HOU_SOP_ALEMBIC_TYPE:
-                _save_outputs_to_user_data(tk_alembic_node, alembic_node)
-            elif alembic_operator == cls.HOU_ROP_ALEMBIC_TYPE:
-                _move_outputs(tk_alembic_node, alembic_node)
+            _copy_inputs(tk_fbx_node, fbx_node)
+            if fbx_operator == cls.HOU_SOP_fbx_TYPE:
+                _save_outputs_to_user_data(tk_fbx_node, fbx_node)
+            elif fbx_operator == cls.HOU_ROP_fbx_TYPE:
+                _move_outputs(tk_fbx_node, fbx_node)
 
             # make the new node the same color
-            alembic_node.setColor(tk_alembic_node.color())
+            fbx_node.setColor(tk_fbx_node.color())
 
-            # remember the name and position of the original tk alembic node
-            tk_alembic_node_name = tk_alembic_node.name()
-            tk_alembic_node_pos = tk_alembic_node.position()
+            # remember the name and position of the original tk fbx node
+            tk_fbx_node_name = tk_fbx_node.name()
+            tk_fbx_node_pos = tk_fbx_node.position()
 
-            # destroy the original tk alembic node
-            tk_alembic_node.destroy()
+            # destroy the original tk fbx node
+            tk_fbx_node.destroy()
 
-            # name and reposition the new, regular alembic node to match the
+            # name and reposition the new, regular fbx node to match the
             # original
-            alembic_node.setName(tk_alembic_node_name)
-            alembic_node.setPosition(tk_alembic_node_pos)
+            fbx_node.setName(tk_fbx_node_name)
+            fbx_node.setPosition(tk_fbx_node_pos)
 
             app.log_debug(
-                "Converted: Tk Alembic node '%s' to Alembic node."
-                % (tk_alembic_node_name,)
+                "Converted: Tk fbx node '%s' to fbx node."
+                % (tk_fbx_node_name,)
             )
 
     @classmethod
-    def get_all_tk_alembic_nodes(cls):
+    def get_all_tk_fbx_nodes(cls):
         """
-        Returns a list of all tk-houdini-alembicnode instances in the current
+        Returns a list of all tk-houdini-fbxnode instances in the current
         session.
         """
 
-        tk_node_type = TkAlembicNodeHandler.TK_ALEMBIC_NODE_TYPE
+        tk_node_type = TkfbxNodeHandler.TK_fbx_NODE_TYPE
 
-        # get all instances of tk alembic rop/sop nodes
-        tk_alembic_nodes = []
-        tk_alembic_nodes.extend(
+        # get all instances of tk fbx rop/sop nodes
+        tk_fbx_nodes = []
+        tk_fbx_nodes.extend(
             hou.nodeType(hou.sopNodeTypeCategory(), tk_node_type).instances()
         )
-        tk_alembic_nodes.extend(
+        tk_fbx_nodes.extend(
             hou.nodeType(hou.ropNodeTypeCategory(), tk_node_type).instances()
         )
 
-        return tk_alembic_nodes
+        return tk_fbx_nodes
 
     @classmethod
     def get_output_path(cls, node):
@@ -319,14 +319,14 @@ class TkAlembicNodeHandler(object):
             if output_profile_name in self._output_profiles:
                 self._app.log_warning(
                     "Found multiple output profiles named '%s' for the "
-                    "Tk Alembic node! Only the first one will be available."
+                    "Tk fbx node! Only the first one will be available."
                     % (output_profile_name,)
                 )
                 continue
 
             self._output_profiles[output_profile_name] = output_profile
             self._app.log_debug(
-                "Caching alembic output profile: '%s'" % (output_profile_name,)
+                "Caching fbx output profile: '%s'" % (output_profile_name,)
             )
 
     ############################################################################
@@ -344,24 +344,24 @@ class TkAlembicNodeHandler(object):
 
         self._app.log_debug("Copied render path to clipboard: %s" % (render_path,))
 
-    # create an Alembic node, set the path to the output path of current node
-    def create_alembic_node(self):
+    # create an fbx node, set the path to the output path of current node
+    def create_fbx_node(self):
 
         current_node = hou.pwd()
         output_path_parm = current_node.parm(self.NODE_OUTPUT_PATH_PARM)
-        alembic_node_name = "alembic_" + current_node.name()
+        fbx_node_name = "fbx_" + current_node.name()
 
-        # create the alembic node and set the filename parm
-        alembic_node = current_node.parent().createNode(self.HOU_SOP_ALEMBIC_TYPE)
-        alembic_node.parm(self.NODE_OUTPUT_PATH_PARM).set(
+        # create the fbx node and set the filename parm
+        fbx_node = current_node.parent().createNode(self.HOU_SOP_fbx_TYPE)
+        fbx_node.parm(self.NODE_OUTPUT_PATH_PARM).set(
             output_path_parm.menuLabels()[output_path_parm.eval()]
         )
-        alembic_node.setName(alembic_node_name, unique_name=True)
+        fbx_node.setName(fbx_node_name, unique_name=True)
 
         # move it away from the origin
-        alembic_node.moveToGoodPosition()
+        fbx_node.moveToGoodPosition()
 
-    # get labels for all tk-houdini-alembic node output profiles
+    # get labels for all tk-houdini-fbx node output profiles
     def get_output_profile_menu_labels(self):
 
         menu_labels = []
@@ -398,7 +398,7 @@ class TkAlembicNodeHandler(object):
         output_profile = self._get_output_profile(node)
 
         self._app.log_debug(
-            "Applying tk alembic node profile: %s" % (output_profile["name"],)
+            "Applying tk fbx node profile: %s" % (output_profile["name"],)
         )
 
         # apply the supplied settings to the node
@@ -651,7 +651,7 @@ def _copy_parm_values(source_node, target_node, excludes=None):
                     # that's selected. To support both, we try the old way (which is how our
                     # otl is setup to work), and if that fails we then fall back on mapping
                     # the integer index from our otl's parm over to the string language name
-                    # that the alembic node is expecting.
+                    # that the fbx node is expecting.
                     if source_parm.name().startswith(
                         "lpre"
                     ) or source_parm.name().startswith("lpost"):
@@ -696,7 +696,7 @@ def _save_outputs_to_user_data(source_node, target_node):
         outputs.append(output_dict)
 
     # get the current encoder for the handler
-    handler_cls = TkAlembicNodeHandler
+    handler_cls = TkfbxNodeHandler
     codecs = handler_cls.TK_OUTPUT_CONNECTION_CODECS
     encoder = codecs[handler_cls.TK_OUTPUT_CONNECTION_CODEC]["encode"]
 
@@ -710,7 +710,7 @@ def _save_outputs_to_user_data(source_node, target_node):
 # restore output connections from this node to the target node.
 def _restore_outputs_from_user_data(source_node, target_node):
 
-    data_str = source_node.userData(TkAlembicNodeHandler.TK_OUTPUT_CONNECTIONS_KEY)
+    data_str = source_node.userData(TkfbxNodeHandler.TK_OUTPUT_CONNECTIONS_KEY)
 
     if not data_str:
         return
@@ -721,7 +721,7 @@ def _restore_outputs_from_user_data(source_node, target_node):
     data_str = data_str[sep_index + 1 :]
 
     # get the matching decoder based on the codec name
-    handler_cls = TkAlembicNodeHandler
+    handler_cls = TkfbxNodeHandler
     codecs = handler_cls.TK_OUTPUT_CONNECTION_CODECS
     decoder = codecs[codec_name]["decode"]
 
