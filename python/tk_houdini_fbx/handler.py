@@ -39,7 +39,7 @@ class TkfbxNodeHandler(object):
     NODE_OUTPUT_PATH_PARM = "filename"
     """The name of the output path parameter on the node."""
 
-    TK_fbx_NODE_TYPE = "sgtk_fbx"
+    TK_fbx_NODE_TYPE = "sgtk_fbx_sop"
     """The class of node as defined in Houdini for the fbx nodes."""
 
     TK_OUTPUT_CONNECTIONS_KEY = "tk_output_connections"
@@ -190,12 +190,13 @@ class TkfbxNodeHandler(object):
 
         # get all instances of tk fbx rop/sop nodes
         tk_fbx_nodes = []
-        tk_fbx_nodes.extend(
-            hou.nodeType(hou.sopNodeTypeCategory(), tk_node_type).instances()
-        )
-        tk_fbx_nodes.extend(
-            hou.nodeType(hou.ropNodeTypeCategory(), tk_node_type).instances()
-        )
+        # tk_fbx_nodes.extend(
+        #     hou.nodeType(hou.sopNodeTypeCategory(), tk_node_type).instances()
+        # )
+        # tk_fbx_nodes.extend(
+        #     hou.nodeType(hou.ropNodeTypeCategory(), tk_node_type).instances()
+        # )
+        tk_fbx_nodes.extend(hou.sopNodeTypeCategory().nodeType("sgtk_fbx_sop").instances())
 
         if not tk_fbx_nodes:
             app.log_debug("No Toolkit fbx Nodes found for conversion.")
@@ -278,12 +279,14 @@ class TkfbxNodeHandler(object):
 
         # get all instances of tk fbx rop/sop nodes
         tk_fbx_nodes = []
-        tk_fbx_nodes.extend(
-            hou.nodeType(hou.sopNodeTypeCategory(), tk_node_type).instances()
-        )
-        tk_fbx_nodes.extend(
-            hou.nodeType(hou.ropNodeTypeCategory(), tk_node_type).instances()
-        )
+        # tk_fbx_nodes.extend(
+        #     hou.nodeType(hou.sopNodeTypeCategory(), tk_node_type).instances()
+        # )
+        # tk_fbx_nodes.extend(
+        #     hou.nodeType(hou.ropNodeTypeCategory(), tk_node_type).instances()
+        # )
+        tk_fbx_nodes = hou.sopNodeTypeCategory().nodeType("sgtk_fbx_sop").instances()
+        print(tk_fbx_nodes)
 
         return tk_fbx_nodes
 
