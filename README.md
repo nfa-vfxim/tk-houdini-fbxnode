@@ -1,20 +1,39 @@
-[![Python 2.7 3.7](https://img.shields.io/badge/python-2.7%20%7C%203.7-blue.svg)](https://www.python.org/)
-[![Build Status](https://dev.azure.com/shotgun-ecosystem/Toolkit/_apis/build/status/Apps/tk-houdini-alembicnode?branchName=master)](https://dev.azure.com/shotgun-ecosystem/Toolkit/_build/latest?definitionId=72&branchName=master)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![Linting](https://img.shields.io/badge/PEP8%20by-Hound%20CI-a873d1.svg)](https://houndci.com)
+[![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/nfa-vfxim/tk-houdini-fbxnode?include_prereleases)](https://github.com/nfa-vfxim/tk-houdini-fbxnode) 
+[![GitHub issues](https://img.shields.io/github/issues/nfa-vfxim/tk-houdini-fbxnode)](https://github.com/nfa-vfxim/tk-houdini-fbxnode/issues) 
 
-## Documentation
-This repository is a part of the ShotGrid Pipeline Toolkit.
 
-- For more information about this app and for release notes, *see the wiki section*.
-- For general information and documentation, click here: https://developer.shotgridsoftware.com/d587be80/?title=Integrations+User+Guide
-- For information about ShotGrid in general, click here: https://help.autodesk.com/view/SGSUB/ENU/
+# fbx Output Node
 
-## Using this app in your Setup
-All the apps that are part of our standard app suite are pushed to our App Store.
-This is where you typically go if you want to install an app into a project you are
-working on. For an overview of all the Apps and Engines in the Toolkit App Store,
-click here: https://developer.shotgridsoftware.com/162eaa4b/?title=Pipeline+Integration+Components
+Support for the Toolkit fbx output node in Houdini.
 
-## Have a Question?
-Don't hesitate to contact us! You can find us on https://knowledge.autodesk.com/contact-support
+> Supported engines: tk-houdini
+
+## Requirements
+
+| ShotGrid version | Core version | Engine version |
+|------------------|--------------|----------------|
+| -                | v0.12.5      | v1.7.1         |
+
+## Configuration
+
+### Strings
+
+| Name                | Description                                                                                                                           | Default value |
+|---------------------|---------------------------------------------------------------------------------------------------------------------------------------|---------------|
+| `default_node_name` | A default name for fbx output nodes created in houdini. Allowed characters include letters, numbers, periods, dashes, or underscores. | sgtk_fbx      |
+
+
+### Templates
+
+| Name                 | Description                                                                                                                                      | Default value | Fields                   |
+|----------------------|--------------------------------------------------------------------------------------------------------------------------------------------------|---------------|--------------------------|
+| `work_file_template` | A reference to a template which locates a Houdini work file on disk.  This is used to drive the version and optionally the name of output files. |               | context, version, [name] |
+
+
+### Lists
+
+| Name              | Description                                                                                                                                                                                                                                                                                  | Default value |
+|-------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------|
+| `output_profiles` | A list of dictionaries defining the various fbx output profiles. Each profile contains a unique name that describes the profile, the cach template for writing to disk, a color to distinguish each profile type in the node graph, and optional settings to apply to the internal fbx node. |               |
+
+
