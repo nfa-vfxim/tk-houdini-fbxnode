@@ -14,32 +14,30 @@ import os
 import sys
 import zlib
 
-from sgtk.util import pickle
-
 # houdini
 import hou
-
 # toolkit
 import sgtk
+from sgtk.util import pickle
 
 
-class TkfbxNodeHandler(object):
+class TkFbxNodeHandler(object):
     """Handle Tk Fbx node operations and callbacks."""
 
     ############################################################################
     # Class data
 
-    HOU_ROP_fbx_TYPE = "fbx"
+    HOU_ROP_FBX_TYPE = "fbx"
     """Houdini type for fbx rops."""
 
-    HOU_SOP_fbx_TYPE = "rop_fbx"
+    HOU_SOP_FBX_TYPE = "rop_fbx"
     """Houdini type for fbx sops."""
     # this is correct. the houdini internal rop_fbx is a sop.
 
-    NODE_OUTPUT_PATH_PARM = "filename"
+    NODE_OUTPUT_PATH_PARM = "sopoutput"
     """The name of the output path parameter on the node."""
 
-    TK_fbx_NODE_TYPE = "sgtk_fbx_sop"
+    TK_FBX_NODE_TYPE = "sgtk_fbx_sop"
     """The class of node as defined in Houdini for the fbx nodes."""
 
     TK_OUTPUT_CONNECTIONS_KEY = "tk_output_connections"
@@ -83,12 +81,12 @@ class TkfbxNodeHandler(object):
         fbx_nodes = []
         fbx_nodes.extend(
             hou.nodeType(
-                hou.sopNodeTypeCategory(), cls.HOU_SOP_fbx_TYPE
+                hou.sopNodeTypeCategory(), cls.HOU_SOP_FBX_TYPE
             ).instances()
         )
         fbx_nodes.extend(
             hou.nodeType(
-                hou.ropNodeTypeCategory(), cls.HOU_ROP_fbx_TYPE
+                hou.ropNodeTypeCategory(), cls.HOU_ROP_FBX_TYPE
             ).instances()
         )
 
@@ -97,7 +95,7 @@ class TkfbxNodeHandler(object):
             return
 
         # the tk node type we'll be converting to
-        tk_node_type = TkfbxNodeHandler.TK_fbx_NODE_TYPE
+        tk_node_type = TkFbxNodeHandler.TK_FBX_NODE_TYPE
 
         # iterate over all the fbx nodes and attempt to convert them
         for fbx_node in fbx_nodes:
@@ -123,7 +121,7 @@ class TkfbxNodeHandler(object):
             # and set that item in the menu.
             try:
                 output_profile_parm = tk_fbx_node.parm(
-                    TkfbxNodeHandler.TK_OUTPUT_PROFILE_PARM
+                    TkFbxNodeHandler.TK_OUTPUT_PROFILE_PARM
                 )
                 output_profile_index = output_profile_parm.menuLabels().index(
                     tk_output_profile_name
@@ -143,9 +141,9 @@ class TkfbxNodeHandler(object):
             _copy_inputs(fbx_node, tk_fbx_node)
 
             # determine the built-in operator type
-            if fbx_node.type().name() == cls.HOU_SOP_fbx_TYPE:
+            if fbx_node.type().name() == cls.HOU_SOP_FBX_TYPE:
                 _restore_outputs_from_user_data(fbx_node, tk_fbx_node)
-            elif fbx_node.type().name() == cls.HOU_ROP_fbx_TYPE:
+            elif fbx_node.type().name() == cls.HOU_ROP_FBX_TYPE:
                 _move_outputs(fbx_node, tk_fbx_node)
 
             # make the new node the same color. the profile will set a color,
@@ -178,7 +176,7 @@ class TkfbxNodeHandler(object):
 
         """
 
-        tk_node_type = TkfbxNodeHandler.TK_fbx_NODE_TYPE
+        tk_node_type = TkFbxNodeHandler.TK_FBX_NODE_TYPE
 
         # determine the surface operator type for this class of node
         sop_types = hou.sopNodeTypeCategory().nodeTypes()
@@ -207,9 +205,9 @@ class TkfbxNodeHandler(object):
 
             # determine the corresponding, built-in operator type
             if tk_fbx_node.type() == sop_type:
-                fbx_operator = cls.HOU_SOP_fbx_TYPE
+                fbx_operator = cls.HOU_SOP_FBX_TYPE
             elif tk_fbx_node.type() == rop_type:
-                fbx_operator = cls.HOU_ROP_fbx_TYPE
+                fbx_operator = cls.HOU_ROP_FBX_TYPE
             else:
                 app.log_warning(
                     "Unknown type for node '%s': %s'"
@@ -243,9 +241,9 @@ class TkfbxNodeHandler(object):
 
             # copy the inputs and move the outputs
             _copy_inputs(tk_fbx_node, fbx_node)
-            if fbx_operator == cls.HOU_SOP_fbx_TYPE:
+            if fbx_operator == cls.HOU_SOP_FBX_TYPE:
                 _save_outputs_to_user_data(tk_fbx_node, fbx_node)
-            elif fbx_operator == cls.HOU_ROP_fbx_TYPE:
+            elif fbx_operator == cls.HOU_ROP_FBX_TYPE:
                 _move_outputs(tk_fbx_node, fbx_node)
 
             # make the new node the same color
@@ -275,16 +273,9 @@ class TkfbxNodeHandler(object):
         session.
         """
 
-        tk_node_type = TkfbxNodeHandler.TK_fbx_NODE_TYPE
+        tk_node_type = TkFbxNodeHandler.TK_FBX_NODE_TYPE
 
-        # get all instances of tk fbx rop/sop nodes
-        tk_fbx_nodes = []
-        # tk_fbx_nodes.extend(
-        #     hou.nodeType(hou.sopNodeTypeCategory(), tk_node_type).instances()
-        # )
-        # tk_fbx_nodes.extend(
-        #     hou.nodeType(hou.ropNodeTypeCategory(), tk_node_type).instances()
-        # )
+        # get all instances of tk fbx sop nodes
         tk_fbx_nodes = hou.sopNodeTypeCategory().nodeType("sgtk_fbx_sop").instances()
         print(tk_fbx_nodes)
 
@@ -349,13 +340,12 @@ class TkfbxNodeHandler(object):
 
     # create an fbx node, set the path to the output path of current node
     def create_fbx_node(self):
-
         current_node = hou.pwd()
         output_path_parm = current_node.parm(self.NODE_OUTPUT_PATH_PARM)
         fbx_node_name = "fbx_" + current_node.name()
 
         # create the fbx node and set the filename parm
-        fbx_node = current_node.parent().createNode(self.HOU_SOP_fbx_TYPE)
+        fbx_node = current_node.parent().createNode(self.HOU_SOP_FBX_TYPE)
         fbx_node.parm(self.NODE_OUTPUT_PATH_PARM).set(
             output_path_parm.menuLabels()[output_path_parm.eval()]
         )
@@ -699,7 +689,7 @@ def _save_outputs_to_user_data(source_node, target_node):
         outputs.append(output_dict)
 
     # get the current encoder for the handler
-    handler_cls = TkfbxNodeHandler
+    handler_cls = TkFbxNodeHandler
     codecs = handler_cls.TK_OUTPUT_CONNECTION_CODECS
     encoder = codecs[handler_cls.TK_OUTPUT_CONNECTION_CODEC]["encode"]
 
@@ -713,7 +703,7 @@ def _save_outputs_to_user_data(source_node, target_node):
 # restore output connections from this node to the target node.
 def _restore_outputs_from_user_data(source_node, target_node):
 
-    data_str = source_node.userData(TkfbxNodeHandler.TK_OUTPUT_CONNECTIONS_KEY)
+    data_str = source_node.userData(TkFbxNodeHandler.TK_OUTPUT_CONNECTIONS_KEY)
 
     if not data_str:
         return
@@ -724,7 +714,7 @@ def _restore_outputs_from_user_data(source_node, target_node):
     data_str = data_str[sep_index + 1 :]
 
     # get the matching decoder based on the codec name
-    handler_cls = TkfbxNodeHandler
+    handler_cls = TkFbxNodeHandler
     codecs = handler_cls.TK_OUTPUT_CONNECTION_CODECS
     decoder = codecs[codec_name]["decode"]
 

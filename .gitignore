@@ -1,5 +1,8 @@
 *.py[cod]
 
+# discard houdini backups
+otls/backup
+
 # C extensions
 *.so
 

@@ -15,14 +15,14 @@ fbx Output node App for use with Toolkit's Houdini engine.
 import sgtk
 
 
-class TkfbxNodeApp(sgtk.platform.Application):
+class TkFbxNodeApp(sgtk.platform.Application):
     """The fbx Output Node."""
 
     def init_app(self):
         """Initialize the app."""
 
         tk_houdini_fbx = self.import_module("tk_houdini_fbx")
-        self.handler = tk_houdini_fbx.TkfbxNodeHandler(self)
+        self.handler = tk_houdini_fbx.TkFbxNodeHandler(self)
 
     def convert_to_regular_fbx_nodes(self):
         """Convert Toolkit fbx nodes to regular fbx nodes.
