@@ -37,7 +37,7 @@ class TkFbxNodeHandler(object):
     NODE_OUTPUT_PATH_PARM = "sopoutput"
     """The name of the output path parameter on the node."""
 
-    TK_FBX_NODE_TYPE = "sgtk_fbx_sop"
+    TK_FBX_NODE_TYPE = "sgtk_fbx"
     """The class of node as defined in Houdini for the fbx nodes."""
 
     TK_OUTPUT_CONNECTIONS_KEY = "tk_output_connections"
@@ -276,7 +276,7 @@ class TkFbxNodeHandler(object):
         tk_node_type = TkFbxNodeHandler.TK_FBX_NODE_TYPE
 
         # get all instances of tk fbx sop nodes
-        tk_fbx_nodes = hou.sopNodeTypeCategory().nodeType("sgtk_fbx_sop").instances()
+        tk_fbx_nodes = hou.sopNodeTypeCategory().nodeType(tk_node_type).instances()
         print(tk_fbx_nodes)
 
         return tk_fbx_nodes

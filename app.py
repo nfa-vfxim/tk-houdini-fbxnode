@@ -42,7 +42,7 @@ class TkFbxNodeApp(sgtk.platform.Application):
 
         self.log_debug("Converting Toolkit fbx nodes to built-in fbx nodes.")
         tk_houdini_fbx = self.import_module("tk_houdini_fbx")
-        tk_houdini_fbx.TkfbxNodeHandler.convert_to_regular_fbx_nodes(self)
+        tk_houdini_fbx.TkFbxNodeHandler.convert_to_regular_fbx_nodes(self)
 
     def convert_back_to_tk_fbx_nodes(self):
         """Convert regular fbx nodes back to Tooklit fbx nodes.
@@ -63,7 +63,7 @@ class TkFbxNodeApp(sgtk.platform.Application):
             "Converting built-in fbx nodes back to Toolkit fbx nodes."
         )
         tk_houdini_fbx = self.import_module("tk_houdini_fbx")
-        tk_houdini_fbx.TkfbxNodeHandler.convert_back_to_tk_fbx_nodes(self)
+        tk_houdini_fbx.TkFbxNodeHandler.convert_back_to_tk_fbx_nodes(self)
 
     def get_nodes(self):
         """
@@ -79,7 +79,7 @@ class TkFbxNodeApp(sgtk.platform.Application):
 
         self.log_debug("Retrieving tk-houdini-fbx nodes...")
         tk_houdini_fbx = self.import_module("tk_houdini_fbx")
-        nodes = tk_houdini_fbx.TkfbxNodeHandler.get_all_tk_fbx_nodes()
+        nodes = tk_houdini_fbx.TkFbxNodeHandler.get_all_tk_fbx_nodes()
         self.log_debug("Found %s tk-houdini-fbx nodes." % (len(nodes),))
         return nodes
 
@@ -97,7 +97,7 @@ class TkFbxNodeApp(sgtk.platform.Application):
 
         self.log_debug("Retrieving output path for %s" % (node,))
         tk_houdini_fbx = self.import_module("tk_houdini_fbx")
-        output_path = tk_houdini_fbx.TkfbxNodeHandler.get_output_path(node)
+        output_path = tk_houdini_fbx.TkFbxNodeHandler.get_output_path(node)
         self.log_debug("Retrieved output path: %s" % (output_path,))
         return output_path
 
